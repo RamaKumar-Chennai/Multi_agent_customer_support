@@ -1,0 +1,27 @@
+# Virtual environments
+.venv/
+.venv-1
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# Model files / large binaries
+*.pkl
+
+# Data files
+*.csv
+
+
+#Image file
+Copilot_20260907_135808.png
+
+#Other files and folder
+code1.ipynb
+vector_emb
+distilbert_sentiment

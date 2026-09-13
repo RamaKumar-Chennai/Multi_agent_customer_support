@@ -351,8 +351,21 @@ def agent_pipeline_stream(message, history):
     yield history
     time.sleep(1)
     priority = priority_agent.invoke(message)
+    print("priority in the gradio agent pipeline stream  is ",priority)
+
     history[-1] = {"role": "assistant", "content": f"✅ Priority: {priority}"}
     yield history
+
+    # 🔹 Escalation check
+    string=priority
+    temp=string.split("(")[0].strip()
+    if temp == "High":
+      print("Entering the priority high block ")
+      escalation_msg = "**⚠️ Ticket has been escalated to the customer support team.**"
+      history = history + [{"role": "assistant", "content": escalation_msg}]
+      yield history
+
+
 
     # Step 4: Summary
     summary = f"""

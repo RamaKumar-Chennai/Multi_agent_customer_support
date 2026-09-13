@@ -10,6 +10,7 @@ import gradio as gr
 from langchain_community.llms import Ollama
 
 import pandas as pd
+import re
 
 from langchain_core.tools import tool
 import joblib
@@ -204,12 +205,29 @@ priority_labels = {
     2: "Medium"
 }
 
-# Inside your agent functions
+# Inside agent functions
+
+@tool
+# Cleaning function
+def clean_text_agent(text):
+    """ Clean the text using the clean_text_agent"""
+    text = text.lower()
+    text = re.sub(r"http\S+|www\S+", "", text)   # remove URLs
+    text = re.sub(r"[^a-z0-9\s]", "", text)      # remove special chars
+    text = re.sub(r"\s+", " ", text).strip()     # remove extra spaces
+    return text
+
+
+
+
+
 @tool
 def intent_agent(text: str) -> str:
     """Classify intent using TF-IDF + Logistic Regression with confidence."""
     intent_model = joblib.load("logreg_intent.pkl")
     vectorizer = joblib.load("tfidf_vectorizer.pkl")
+
+    text=clean_text_agent.invoke(text)
 
     X = vectorizer.transform([text])
     pred_class = intent_model.predict(X)[0]   # integer
@@ -227,6 +245,7 @@ def priority_agent(text: str) -> str:
     priority_model = joblib.load("logreg_priority.pkl")
     vectorizer = joblib.load("tfidf_vectorizer.pkl")
 
+    text=clean_text_agent.invoke(text)
     X = vectorizer.transform([text])
     pred_class = priority_model.predict(X)[0]   # integer
     proba = priority_model.predict_proba(X)[0]
@@ -250,7 +269,7 @@ def sentiment_agent(text: str) -> str:
     # Create sentiment pipeline
     sentiment_pipeline = pipeline("sentiment-analysis", model=model, tokenizer=tokenizer)
 
-        
+    text=clean_text_agent.invoke(text)    
     res = sentiment_pipeline(text)[0]
     
     return f"{res['label']} (confidence: {res['score']:.2f})"

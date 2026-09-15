@@ -1,7 +1,7 @@
 #Import the required libraries
 
 from langchain_core.documents import Document
-#from langchain_community.document_loaders import CSVLoader
+
 from langchain_community.vectorstores import FAISS
 
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -23,20 +23,7 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipe
 
 
 # Step 1: Load and split text files
-"""
-csv_files = [r"D:\VS_CODE\INTEL-AIML\Multi_agent_customer_support\support_tickets_10k.csv", r"D:\VS_CODE\INTEL-AIML\Multi_agent_customer_support\faq_knowledge_base_150.csv"]
-#csv_files = [r"D:\VS_CODE\INTEL-AIML\Multi_agent_customer_support\support_tickets_10k.csv"]
-csv_docs = []
-
-for f in csv_files:
-    loader =CSVLoader(f, encoding="utf-8")
-    csv_docs.extend(loader.load())
-
-"""
-
-
-
-# Example: keep only "ticket_text" and "ticket_category" from support_tickets_10k.csv
+# Keep only "ticket_text" and "ticket_category" from support_tickets_10k.csv
 df1 = pd.read_csv(
     r"D:\VS_CODE\INTEL-AIML\Multi_agent_customer_support\support_tickets_10k.csv",
     usecols=["ticket_text", "resolution_text"]   
@@ -115,7 +102,7 @@ llm = Ollama(model="llama3")
 
 # --- Chatbot answer (RAG Part) ---
 def get_answer(query: str):
-    # Step 1: Retrieve relevant docs (assuming vector_search is defined elsewhere)
+    # Step 1: Retrieve relevant docs 
     docs = vector_search(query, top_val=3)
     context = "\n".join([f"- {d.page_content} | {d.metadata}" for d in docs])
 

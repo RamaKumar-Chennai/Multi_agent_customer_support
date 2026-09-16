@@ -296,7 +296,7 @@ def agent_pipeline_stream(message, history):
     # Step 1: Sentiment
     history = history + [{"role": "assistant", "content": "🔍 Analyzing sentiment..."}]
     yield history
-    time.sleep(1)
+    time.sleep(2)
     sentiment = sentiment_agent.invoke(message)
     history[-1] = {"role": "assistant", "content": f"✅ Sentiment: {sentiment}"}
     yield history
@@ -304,7 +304,7 @@ def agent_pipeline_stream(message, history):
     # Step 2: Intent
     history = history + [{"role": "assistant", "content": "📊 Classifying intent..."}]
     yield history
-    time.sleep(1)
+    time.sleep(2)
     intent = intent_agent.invoke(message)
     history[-1] = {"role": "assistant", "content": f"✅ Intent: {intent}"}
     yield history
@@ -312,7 +312,7 @@ def agent_pipeline_stream(message, history):
     # Step 3: Priority
     history = history + [{"role": "assistant", "content": "⚡ Determining priority..."}]
     yield history
-    time.sleep(1)
+    time.sleep(2)
     priority = priority_agent.invoke(message)
     print("priority in the gradio agent pipeline stream  is ",priority)
 
@@ -341,7 +341,7 @@ def agent_pipeline_stream(message, history):
     history = history + [{"role": "assistant", "content": summary}]
     yield history
     
-
+    
     # Step 5: RAG Answer
     history = history + [{"role": "assistant", "content": "📚 Retrieving knowledge base suggestions..."}]
     yield history
@@ -359,10 +359,10 @@ def agent_pipeline_stream(message, history):
 # --- Gradio UI ---
 # --- Chat Interface for chatbot ---
 
-
-
 with gr.Blocks() as demo:
+   
     # Intro section with styled text and image
+
     gr.Markdown(
         """
         <div style="text-align:center; font-size:28px; color:#2E86C1; font-weight:bold;">
@@ -374,11 +374,14 @@ with gr.Blocks() as demo:
         """
     )
 
+   
     gr.Image(
         value="D:\VS_CODE\INTEL-AIML\Multi_agent_customer_support\Copilot_20260907_135808.png",   
         type="filepath",
-        label="System Workflow Overview",
-        width=400
+        width=400,
+        label=None,          # hides the "System Workflow Overview" label
+        show_label=False   # removes label space entirely
+        
     )
 
     gr.Markdown(
@@ -392,8 +395,8 @@ with gr.Blocks() as demo:
     )
 
 
-    chatbot = gr.Chatbot()
-    msg = gr.Textbox(placeholder="Type your query here...")
+    chatbot = gr.Chatbot(show_label=False)
+    msg = gr.Textbox(show_label=False,placeholder="Type your query here...")
     clear = gr.Button("Clear")
 
     msg.submit(agent_pipeline_stream, [msg, chatbot], [chatbot])

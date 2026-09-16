@@ -11,11 +11,12 @@ import gradio as gr
 import time
 from langchain_ollama import OllamaLLM
 
+
 import pandas as pd
 import re
 
 from langchain_core.tools import tool
-import joblib
+import joblib 
 import time
 from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -99,7 +100,7 @@ def vector_search(query, top_val=3):
 
 
 # Initialize Ollama LLM
-#llm = Ollama(model="llama3")
+
 llm=OllamaLLM(model="llama3")
 
 
@@ -186,7 +187,12 @@ def intent_agent(text: str) -> str:
     text=clean_text_agent.invoke(text)
 
     X = vectorizer.transform([text])
-    pred_class = intent_model.predict(X)[0]   # integer
+    pred_class = intent_model.predict(X)   # integer
+    print("The predicted class for intent is ",pred_class)
+    #The predicted class for intent is  [2]
+
+    pred_class=pred_class[0]
+
     proba = intent_model.predict_proba(X)[0]
     confidence = max(proba)
 
@@ -215,7 +221,7 @@ def priority_agent(text: str) -> str:
 def sentiment_agent(text: str) -> str:
     """Classify sentiment using fine-tuned DistilBERT (local folder)."""
 
-    # Point to the folder where you saved the model
+    # Point to the folder the model is saved
     model_path = "distilbert_sentiment"
 
     # Load tokenizer and model
@@ -226,7 +232,14 @@ def sentiment_agent(text: str) -> str:
     sentiment_pipeline = pipeline("sentiment-analysis", model=model, tokenizer=tokenizer)
 
     text=clean_text_agent.invoke(text)    
-    res = sentiment_pipeline(text)[0]
+    res = sentiment_pipeline(text)
+    print("the final result is ",res)
+    #[{'label': 'negative', 'score': 0.4951564073562622}]
+  
+
+    res=res[0]
+    print("result of sentiment pipeline is ",res)
+    #result of sentiment pipeline is  {'label': 'negative', 'score': 0.9044210910797119}
     
     return f"{res['label']} (confidence: {res['score']:.2f})"
 

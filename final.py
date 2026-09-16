@@ -7,7 +7,9 @@ from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import gradio as gr
-from langchain_community.llms import Ollama
+
+import time
+from langchain_ollama import OllamaLLM
 
 import pandas as pd
 import re
@@ -97,7 +99,8 @@ def vector_search(query, top_val=3):
 
 
 # Initialize Ollama LLM
-llm = Ollama(model="llama3")
+#llm = Ollama(model="llama3")
+llm=OllamaLLM(model="llama3")
 
 
 # --- Chatbot answer (RAG Part) ---
@@ -138,40 +141,6 @@ def get_answer(query: str):
     return output
 
 
-
-
-
-
-# --- Gradio UI ---
-with gr.Blocks() as demo:
-    # Intro section with styled text and image
-    gr.Markdown(
-        """
-        <div style="text-align:center; font-size:28px; color:#2E86C1; font-weight:bold;">
-            🛒 Multi-Agent Customer Support Intelligence Platform
-        </div>
-        <div style="text-align:center; font-size:18px; color:#555;">
-            Automating ticket classification, routing, response generation, and escalation for E-commerce
-        </div>
-        """
-    )
-
-    gr.Image(
-        value="D:\VS_CODE\INTEL-AIML\Multi_agent_customer_support\Copilot_20260907_135808.png",   # replace with your architecture image
-        type="filepath",
-        label="System Workflow Overview",
-        width=400
-    )
-
-    gr.Markdown(
-        """
-        <div style="font-size:16px; color:#1B4F72; text-align:justify;">
-            This project demonstrates an <b>AI-powered multi-agent support system</b> built with LangChain, FAISS, and RAG.
-            It processes customer tickets for <b>orders, payments, refunds, and delivery issues</b>.
-            Agents handle classification, retrieval, response generation, escalation, and continuous learning.
-        </div>
-        """
-    )
 
 
 
@@ -307,12 +276,6 @@ def log_to_sql(ticket_text, sentiment, intent, priority, rag_answer):
 
 
 
-
-# --- Chat Interface for chatbot ---
-
-import gradio as gr
-import time
-
 def agent_pipeline_stream(message, history):
     # Add user message
     history = history + [{"role": "user", "content": message}]
@@ -374,17 +337,54 @@ def agent_pipeline_stream(message, history):
     history[-1] = {"role": "assistant", "content": f"📚 RAG Answer\n{rag_answer}"}
     yield history
 
-    #log_to_sql(message, sentiment, intent, priority)
+    
     log_to_sql(message, sentiment, intent, priority, rag_answer)
 
-    
+
+
+
+# --- Gradio UI ---
+# --- Chat Interface for chatbot ---
+
+
+
 with gr.Blocks() as demo:
+    # Intro section with styled text and image
+    gr.Markdown(
+        """
+        <div style="text-align:center; font-size:28px; color:#2E86C1; font-weight:bold;">
+            🛒 Multi-Agent Customer Support Intelligence Platform
+        </div>
+        <div style="text-align:center; font-size:18px; color:#555;">
+            Automating ticket classification, routing, response generation, and escalation for E-commerce
+        </div>
+        """
+    )
+
+    gr.Image(
+        value="D:\VS_CODE\INTEL-AIML\Multi_agent_customer_support\Copilot_20260907_135808.png",   
+        type="filepath",
+        label="System Workflow Overview",
+        width=400
+    )
+
+    gr.Markdown(
+        """
+        <div style="font-size:16px; color:#1B4F72; text-align:justify;">
+            This project demonstrates an <b>AI-powered multi-agent support system</b> built with LangChain, FAISS, and RAG.
+            It processes customer tickets for <b>orders, payments, refunds, and delivery issues</b>.
+            Agents handle classification, retrieval, response generation, escalation, and continuous learning.
+        </div>
+        """
+    )
+
+
     chatbot = gr.Chatbot()
     msg = gr.Textbox(placeholder="Type your query here...")
     clear = gr.Button("Clear")
 
     msg.submit(agent_pipeline_stream, [msg, chatbot], [chatbot])
-    #clear.click(lambda: [], None, chatbot, queue=False)
+   
     clear.click(lambda: ([], ""), None, [chatbot, msg], queue=False)
 
 
